@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Konsumsi BBM Cummins</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e0eafc, #cfdef3);
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .container:hover {
+            transform: translateY(-5px);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 2em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        h3 {
+            color: #2980b9;
+            margin-bottom: 12px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #2980b9;
+            padding-bottom: 5px;
+            display: inline-block;
+        }
+        label {
+            display: block;
+            margin: 10px 0;
+            font-weight: 500;
+            color: #34495e;
+        }
+        select, input {
+            width: 100%;
+            max-width: 220px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background: #f9f9f9;
+        }
+        select:focus, input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+            outline: none;
+        }
+        .required input:invalid {
+            border-color: #e74c3c;
+        }
+        .required input:valid {
+            border-color: #2ecc71;
+        }
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            max-width: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        #calculateBtn, #plnBtn, #warmBtn {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+        }
+        #calculateBtn:hover, #plnBtn:hover, #warmBtn:hover {
+            background: linear-gradient(45deg, #219653, #27ae60);
+            transform: scale(1.05);
+        }
+        #resetBtn {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+        }
+        #resetBtn:hover {
+            background: linear-gradient(45deg, #c0392b, #e74c3c);
+            transform: scale(1.05);
+        }
+        #result {
+            margin-top: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, #ecf0f1, #dfe6e9);
+            border-radius: 10px;
+            font-size: 1em;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        #result h3 {
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+        p {
+            margin: 8px 0;
+            color: #2c3e50;
+        }
+        .hidden {
+            display: none;
+        }
+
+        /* Responsif */
+        @media (min-width: 600px) {
+            h1 {
+                font-size: 2.2em;
+            }
+            .container {
+                padding: 35px;
+            }
+            select, input {
+                max-width: 250px;
+            }
+            button {
+                max-width: 250px;
+            }
+        }
+        @media (max-width: 480px) {
+            .button-group {
+                flex-direction: column;
+            }
+            button {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Kalkulator Konsumsi BBM Cummins</h1>
+        <div class="section">
+            <h3>Spesifikasi Genset</h3>
+            <label>Tipe Genset: 
+                <select id="gensetType" onchange="updateSpecs()" required>
+                    <option value="default">Pilih Tipe Genset</option>
+                    <option value="cummins300">Cummins (300 kVA, 240 kW, 57.3 L/H)</option>
+                    <option value="previous" selected>Cummins (350 kVA, 240 kW, 70.5 L/H)</option>
+                    <option value="cummins400">Cummins (400 kVA, 320 kW, 72 L/H)</option>
+                </select>
+            </label>
+            <div id="gensetSpecs">
+                <p>Kapasitas: 350 kVA, 240 kW</p>
+                <p>Consumption Full Load: 70.5 L/H</p>
+            </div>
+            <label class="required">Total BBM Saat Ini (L): <input type="number" id="totalFuel" step="0.1" required></label>
+        </div>
+
+        <div class="section button-group" style="margin-top: 20px;">
+            <button id="plnBtn" onclick="toggleSection('pln')">PLN OFF</button>
+            <button id="warmBtn" onclick="toggleSection('warm')">Warming UP</button>
+        </div>
+
+        <div id="plnSection" class="section hidden">
+            <h3>PLN OFF</h3>
+            <label>Load MDP1 (kW): <input type="number" id="loadMDP1" step="0.1"></label>
+            <label>Load MDP2 (kW): <input type="number" id="loadMDP2" step="0.1"></label>
+            <label>Engine Run Time Sebelum:</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="number" id="engineHourBefore" placeholder="Jam" step="1" style="max-width: 100px;">
+                <input type="number" id="engineMinBefore" placeholder="Menit" step="1" style="max-width: 100px;">
+            </div>
+            <label>Engine Run Time Sesudah:</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="number" id="engineHourAfter" placeholder="Jam" step="1" style="max-width: 100px;">
+                <input type="number" id="engineMinAfter" placeholder="Menit" step="1" style="max-width: 100px;">
+            </div>
+            <label>Duration (Menit): <input type="number" id="durationPLN" step="1" readonly></label>
+        </div>
+
+        <div id="warmSection" class="section hidden">
+            <h3>Warming Up</h3>
+            <label>Engine Run Time Sebelum:</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="number" id="engineHourBeforeWarm" placeholder="Jam" step="1" style="max-width: 100px;">
+                <input type="number" id="engineMinBeforeWarm" placeholder="Menit" step="1" style="max-width: 100px;">
+            </div>
+            <label>Engine Run Time Sesudah:</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="number" id="engineHourAfterWarm" placeholder="Jam" step="1" style="max-width: 100px;">
+                <input type="number" id="engineMinAfterWarm" placeholder="Menit" step="1" style="max-width: 100px;">
+            </div>
+            <label>Duration (Menit): <input type="number" id="durationWarm" step="1" readonly></label>
+        </div>
+
+        <div class="button-group" id="actionButtons" style="display: none;">
+            <button id="calculateBtn" onclick="calculate()">Hitung</button>
+            <button id="resetBtn" onclick="reset()">Reset ↺</button>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        let gensetData = {
+            "default": { capacityKVA: 0, capacityKW: 0, fullConsumption: 0, consumptionTable: {} },
+            "cummins300": { capacityKVA: 300, capacityKW: 240, fullConsumption: 57.3, consumptionTable: { 10: 5.73, 25: 14.325, 50: 28.65, 75: 42.975, 100: 57.3 } },
+            "previous": { capacityKVA: 350, capacityKW: 240, fullConsumption: 70.5, consumptionTable: { 10: 7.05, 25: 17.625, 50: 35.25, 75: 52.875, 100: 70.5 } },
+            "cummins400": { capacityKVA: 400, capacityKW: 320, fullConsumption: 72, consumptionTable: { 10: 7.2, 25: 18, 50: 36, 75: 54, 100: 72 } }
+        };
+
+        let currentTotalFuel = 0;
+        let lastTotalFuel = 0;
+        let lastDurationPLN = -1;
+        let lastDurationWarm = -1;
+        let lastGensetType = "default";
+        let activeSection = null;
+
+        // Event listener untuk memperbarui totalFuel secara real-time
+        document.getElementById("totalFuel").addEventListener("input", function() {
+            const newTotalFuel = parseFloat(this.value) || 0;
+            if (!isNaN(newTotalFuel) && newTotalFuel > 0 && newTotalFuel !== lastTotalFuel) {
+                currentTotalFuel = newTotalFuel;
+                lastTotalFuel = newTotalFuel;
+                console.log("Total BBM diperbarui ke: " + currentTotalFuel);
+            }
+        });
+
+        function updateSpecs() {
+            const gensetType = document.getElementById("gensetType").value;
+            const specs = gensetData[gensetType];
+            document.getElementById("gensetSpecs").innerHTML = `
+                <p>Kapasitas: ${specs.capacityKVA} kVA, ${specs.capacityKW} kW</p>
+                <p>Consumption Full Load: ${specs.fullConsumption} L/H</p>
+            `;
+            const newTotalFuel = parseFloat(document.getElementById("totalFuel").value) || 0;
+            if (!isNaN(newTotalFuel) && newTotalFuel > 0) {
+                currentTotalFuel = newTotalFuel;
+                lastTotalFuel = newTotalFuel;
+                console.log("Total BBM diatur ulang ke: " + currentTotalFuel + " saat ganti genset");
+            }
+            calculateDuration();
+            calculateDurationWarm();
+        }
+
+        function toggleSection(section) {
+            // Sembunyikan semua section dan tombol aksi jika sudah aktif
+            if (activeSection === section) {
+                document.getElementById(`${section}Section`).classList.add("hidden");
+                document.getElementById("actionButtons").style.display = "none";
+                activeSection = null;
+                return;
+            }
+
+            // Sembunyikan semua section
+            document.getElementById("plnSection").classList.add("hidden");
+            document.getElementById("warmSection").classList.add("hidden");
+            document.getElementById("actionButtons").style.display = "none";
+
+            // Tampilkan section yang dipilih
+            if (section === "pln") {
+                document.getElementById("plnSection").classList.remove("hidden");
+                activeSection = "pln";
+            } else if (section === "warm") {
+                document.getElementById("warmSection").classList.remove("hidden");
+                activeSection = "warm";
+            }
+            document.getElementById("actionButtons").style.display = "flex";
+        }
+
+        function calculateDuration() {
+            const hourBefore = parseFloat(document.getElementById("engineHourBefore").value) || 0;
+            const minBefore = parseFloat(document.getElementById("engineMinBefore").value) || 0;
+            const hourAfter = parseFloat(document.getElementById("engineHourAfter").value) || 0;
+            const minAfter = parseFloat(document.getElementById("engineMinAfter").value) || 0;
+
+            const totalMinBefore = (hourBefore * 60) + minBefore;
+            const totalMinAfter = (hourAfter * 60) + minAfter;
+            const duration = totalMinAfter - totalMinBefore;
+
+            document.getElementById("durationPLN").value = duration >= 0 ? duration : 0;
+        }
+
+        function calculateDurationWarm() {
+            const hourBeforeWarm = parseFloat(document.getElementById("engineHourBeforeWarm").value) || 0;
+            const minBeforeWarm = parseFloat(document.getElementById("engineMinBeforeWarm").value) || 0;
+            const hourAfterWarm = parseFloat(document.getElementById("engineHourAfterWarm").value) || 0;
+            const minAfterWarm = parseFloat(document.getElementById("engineMinAfterWarm").value) || 0;
+
+            const totalMinBeforeWarm = (hourBeforeWarm * 60) + minBeforeWarm;
+            const totalMinAfterWarm = (hourAfterWarm * 60) + minAfterWarm;
+            const durationWarm = totalMinAfterWarm - totalMinBeforeWarm;
+
+            document.getElementById("durationWarm").value = durationWarm >= 0 ? durationWarm : 0;
+        }
+
+        function calculate() {
+            const gensetType = document.getElementById("gensetType").value;
+            const totalFuelInput = document.getElementById("totalFuel").value;
+            if (gensetType === "default" || !totalFuelInput || parseFloat(totalFuelInput) <= 0) {
+                document.getElementById("result").innerHTML = "<h3>Hasil Perhitungan</h3><p>Pilih tipe genset dan masukkan Total BBM Saat Ini yang valid (lebih dari 0).</p>";
+                return;
+            }
+
+            const specs = gensetData[gensetType];
+            const loadMDP1 = parseFloat(document.getElementById("loadMDP1").value) || 0;
+            const loadMDP2 = parseFloat(document.getElementById("loadMDP2").value) || 0;
+            const durationPLN = parseFloat(document.getElementById("durationPLN").value) || 0;
+            const durationWarm = parseFloat(document.getElementById("durationWarm").value) || 0;
+
+            const shouldRecalculate = (durationPLN !== lastDurationPLN || durationWarm !== lastDurationWarm || gensetType !== lastGensetType || lastDurationPLN < 0 || lastDurationWarm < 0);
+
+            let resultHTML = "<h3>Hasil Perhitungan</h3>";
+            let totalConsumption = 0;
+            let remainingFuel = currentTotalFuel;
+
+            if (shouldRecalculate && (durationPLN > 0 || durationWarm > 0)) {
+                if (activeSection === "pln" && durationPLN > 0) {
+                    const loadTotal = loadMDP1 + loadMDP2;
+                    const loadPercentage = (loadTotal / specs.capacityKW) * 100;
+                    let consumptionPerHourPLN = (loadPercentage / 100) * specs.fullConsumption;
+
+                    const percentages = Object.keys(specs.consumptionTable).map(Number).sort((a, b) => a - b);
+                    for (let i = 0; i < percentages.length - 1; i++) {
+                        if (loadPercentage >= percentages[i] && loadPercentage <= percentages[i + 1]) {
+                            const lowerCons = specs.consumptionTable[percentages[i]];
+                            const upperCons = specs.consumptionTable[percentages[i + 1]];
+                            const lowerPerc = percentages[i];
+                            const upperPerc = percentages[i + 1];
+                            consumptionPerHourPLN = lowerCons + ((loadPercentage - lowerPerc) / (upperPerc - lowerPerc)) * (upperCons - lowerCons);
+                            break;
+                        }
+                    }
+                    if (loadPercentage > 100) consumptionPerHourPLN = specs.fullConsumption;
+
+                    const durationPLNHour = durationPLN / 60;
+                    const consumptionPLN = durationPLNHour * consumptionPerHourPLN;
+                    totalConsumption += consumptionPLN;
+
+                    resultHTML += `
+                        <p><b>PLN OFF:</b></p>
+                        <p>Load Total: ${loadTotal.toFixed(2)} kW</p>
+                        <p>Load %: ${loadPercentage.toFixed(2)}%</p>
+                        <p>Consumption per Jam: ${consumptionPerHourPLN.toFixed(2)} L/H</p>
+                        <p>Duration: ${durationPLNHour.toFixed(2)} Jam</p>
+                        <p>Consumption: ${consumptionPLN.toFixed(2)} Liter</p>
+                    `;
+                }
+
+                if (activeSection === "warm" && durationWarm > 0) {
+                    const durationWarmHour = durationWarm / 60;
+                    const consumptionWarm = durationWarmHour * (specs.fullConsumption * 0.1);
+                    totalConsumption += consumptionWarm;
+
+                    resultHTML += `
+                        <p><b>Warming Up:</b></p>
+                        <p>Duration: ${durationWarmHour.toFixed(2)} Jam</p>
+                        <p>Consumption per Jam: ${(specs.fullConsumption * 0.1).toFixed(2)} L/H</p>
+                        <p>Consumption: ${consumptionWarm.toFixed(2)} Liter</p>
+                    `;
+                }
+
+                remainingFuel = Math.max(0, currentTotalFuel - totalConsumption);
+                currentTotalFuel = remainingFuel;
+                console.log("Total Consumption: " + totalConsumption + ", Remaining Fuel: " + remainingFuel + ", Genset Type: " + gensetType);
+            }
+
+            if (durationPLN > 0 || durationWarm > 0) {
+                resultHTML += `<p><b>Total BBM Tersisa:</b> ${remainingFuel.toFixed(2)} Liter</p>`;
+            } else {
+                resultHTML += "<p>Masukkan durasi PLN OFF atau Warming Up untuk menghitung.</p>";
+            }
+
+            if (shouldRecalculate) {
+                lastDurationPLN = durationPLN;
+                lastDurationWarm = durationWarm;
+                lastGensetType = gensetType;
+            }
+
+            document.getElementById("result").innerHTML = resultHTML;
+        }
+
+        function reset() {
+            document.getElementById("loadMDP1").value = "";
+            document.getElementById("loadMDP2").value = "";
+            document.getElementById("engineHourBefore").value = "";
+            document.getElementById("engineMinBefore").value = "";
+            document.getElementById("engineHourAfter").value = "";
+            document.getElementById("engineMinAfter").value = "";
+            document.getElementById("durationPLN").value = "";
+            document.getElementById("engineHourBeforeWarm").value = "";
+            document.getElementById("engineMinBeforeWarm").value = "";
+            document.getElementById("engineHourAfterWarm").value = "";
+            document.getElementById("engineMinAfterWarm").value = "";
+            document.getElementById("durationWarm").value = "";
+            document.getElementById("gensetType").value = "default";
+            document.getElementById("totalFuel").value = "";
+            currentTotalFuel = 0;
+            lastTotalFuel = 0;
+            lastDurationPLN = -1;
+            lastDurationWarm = -1;
+            lastGensetType = "default";
+            activeSection = null;
+            document.getElementById("plnSection").classList.add("hidden");
+            document.getElementById("warmSection").classList.add("hidden");
+            document.getElementById("actionButtons").style.display = "none";
+            document.getElementById("gensetSpecs").innerHTML = "";
+            document.getElementById("result").innerHTML = "";
+            updateSpecs();
+        }
+
+        // Tambahkan event listener untuk memperbarui duration saat input Engine Run Time berubah
+        document.getElementById("engineHourBefore").addEventListener("input", calculateDuration);
+        document.getElementById("engineMinBefore").addEventListener("input", calculateDuration);
+        document.getElementById("engineHourAfter").addEventListener("input", calculateDuration);
+        document.getElementById("engineMinAfter").addEventListener("input", calculateDuration);
+        document.getElementById("engineHourBeforeWarm").addEventListener("input", calculateDurationWarm);
+        document.getElementById("engineMinBeforeWarm").addEventListener("input", calculateDurationWarm);
+        document.getElementById("engineHourAfterWarm").addEventListener("input", calculateDurationWarm);
+        document.getElementById("engineMinAfterWarm").addEventListener("input", calculateDurationWarm);
+
+        // Inisialisasi spesifikasi saat halaman dimuat
+        updateSpecs();
+    </script>
+</body>
+</html>
